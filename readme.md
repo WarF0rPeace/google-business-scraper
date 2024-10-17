@@ -8,7 +8,7 @@
     <img src="https://i.ibb.co/j3FTTYf/logo.png" alt="Logo" width="150" height="150">
   </a>
 
-  <h3 align="center">Google İşletme Scraper</h3>
+  <h3 align="center">Google Business Scraper</h3>
 
   <p align="center">
     Google Earth üzerindeki işletmeleri kolayca sorgulayıp veri toplayın!
