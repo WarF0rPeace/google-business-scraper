@@ -24,7 +24,6 @@
   <ol>
     <li><a href="#🛠-Kurulum">Kurulum</a></li>
     <li><a href="#▶-Kullanım">Kullanım</a></li>
-    <li><a href="#📁-Proje-Yapısı">Proje Yapısı</a></li>
     <li><a href="#📝-Lisans">Lisans</a></li>
   </ol>
 </details>
