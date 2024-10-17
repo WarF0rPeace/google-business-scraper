@@ -67,7 +67,7 @@ Bu projeyi güvenli bir şekilde kullanabilmek için bir sanal ortam oluşturup 
     ```
 
    Alternatif olarak, aşağıdaki bağlantıdan `Google Business Scraper.exe` dosyasını indirerek hemen kullanmaya başlayabilirsiniz:
-   - [Google Business Scraper.exe İndir](https://github.com/WarF0rPeace/google-business-scraper/releases/latest/download/Google%20Business%20Scraper.exe)
+   - [Google Business Scraper.exe İndir](https://github.com/WarF0rPeace/google-business-scraper/releases/latest/download/Google.Business.Scraper.exe)
 
 
 ## ▶ Kullanım
