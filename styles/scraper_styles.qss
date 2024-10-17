@@ -1,0 +1,102 @@
+QWidget {
+    background-color: #121212;
+}
+
+QLabel, QLineEdit, QPushButton, QTableWidget, QListWidget, QComboBox {
+    color: #ffffff;
+    font-size: 16px;
+}
+
+QLineEdit, QTableWidget, QListWidget, QComboBox {
+    background-color: #282c34;
+    border: 1px solid #4e545e;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+QPushButton {
+    background-color: #282828;
+    border-radius: 10px;
+    padding: 10px;
+    color: #ffffff;
+}
+
+QPushButton:hover {
+    background-color: #0e0e0e;
+}
+
+QPushButton:pressed {
+    background-color: #282828;
+}
+
+QTableWidget, QListWidget {
+    outline: none;
+}
+
+QTableCornerButton::section {
+    background-color: #3a3c45;
+}
+
+QHeaderView, QComboBox::drop-down, QHeaderView::section, QHeaderView::section:checked {
+    background-color: #3f3f3f;
+    color: #ffffff;
+    border: none;
+}
+
+QHeaderView {
+    font-size: 16px;
+    border-bottom: 2px solid #666;
+}
+
+QHeaderView::section:before {
+    background-color: #3a3c45;
+}
+
+QTableWidget::item, QListWidget::item, QComboBox::item {
+    padding: 10px;
+}
+
+QTableWidget::item:selected, QListWidget::item:selected, QComboBox::item:selected {
+    background-color: #251e28;
+    color: #ffffff;
+}
+
+QListWidget::item {
+    border-bottom: 1px solid #4e545e;
+    height: 45px;
+}
+
+QListWidget::item:hover {
+    background-color: #3d414b;
+}
+
+QScrollBar {
+    background-color: #282c34;
+    border-radius: 10px;
+}
+
+QScrollBar::handle {
+    background-color: #4c5264;
+    border-radius: 10px;
+}
+
+QScrollBar:vertical {
+    width: 10px;
+}
+
+QScrollBar:horizontal {
+    height: 10px;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #282c34;
+    color: #ffffff;
+}
+
+QComboBox QAbstractItemView::item {
+    padding: 10px;
+}

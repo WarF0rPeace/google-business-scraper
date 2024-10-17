@@ -1,0 +1,24 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# IDE settings
+.idea/
+.vscode/
+
+version.txt
+query.txt
+setup.py
