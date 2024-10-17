@@ -1,6 +1,6 @@
 <div id="top"></div>
 
-![GitHub Contributors](https://img.shields.io/github/contributors/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub Forks](https://img.shields.io/github/forks/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub Stars](https://img.shields.io/github/stars/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub Issues](https://img.shields.io/github/issues/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub License](https://img.shields.io/github/license/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub License](https://img.shields.io/github/downloads/warf0rpeace/google-business-scraper/total.svg?style=for-the-badge)
+![GitHub Contributors](https://img.shields.io/github/contributors/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub Stars](https://img.shields.io/github/stars/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub Issues](https://img.shields.io/github/issues/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub License](https://img.shields.io/github/license/WarF0rPeace/google-business-scraper.svg?style=for-the-badge) ![GitHub License](https://img.shields.io/github/downloads/warf0rpeace/google-business-scraper/total.svg?style=for-the-badge)
 
 <br />
 <div align="center">
