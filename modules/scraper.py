@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup as bs
-import httpx
 import asyncio
 from urllib.parse import unquote
 from PySide6.QtCore import QThread, Signal
