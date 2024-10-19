@@ -4,6 +4,8 @@ import httpx
 import asyncio
 from urllib.parse import unquote
 from PySide6.QtCore import QThread, Signal
+from utils import fetch_utils
+from utils.constants import CHECKBOX_OPTIONS
 from modules.logger import get_logger
 
 logger = get_logger(__name__)
@@ -89,7 +91,7 @@ class GoogleEarthClient:
 
                 rating = place_card.find("rating")
                 rating_score = rating.get("num_rating_stars") if rating else None
-                review_count_element = rating.find(".//review_count/anchor_text") if rating is not None else None
+                review_count_element = rating.find(".//review_count/anchor_text") if rating else None
                 review_count = review_count_element.text.split()[0] if review_count_element is not None else 0
                 
                 rating_score = float(rating_score) if rating_score else 0
@@ -115,10 +117,14 @@ class ScraperWorker(QThread):
     update_data = Signal(dict)
     finished = Signal()
 
-    def __init__(self, queries, max_concurrent_requests=5):
+    def __init__(self, queries, options={}, max_concurrent_requests=5):
         super().__init__()
         self.queries = queries
+        self.options = options
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
+        self._stop_event = asyncio.Event()
+        self.session = fetch_utils.create_client()
+        self.client = None
 
     def run(self):
         logger.info("Starting scraper worker thread.")
@@ -127,39 +133,64 @@ class ScraperWorker(QThread):
         logger.info("Scraper worker thread finished.")
 
     async def scrape(self):
-        async with httpx.AsyncClient() as session:
-            seen_feature_ids = set()
+        self.client = GoogleEarthClient("", self.session)
+        seen_feature_ids = set()
 
-            async def fetch_places(query):
-                client = GoogleEarthClient(query, session)
-                more_places = True
-                start = 0
+        async def fetch_places(query):
+            self.client.query = query
+            more_places = True
+            start = 0
 
-                while more_places:
-                    async with self.semaphore:
-                        client.start = start
-                        places, more_places = await client.get_places()
-                        start += len(places)
+            while more_places:
+                if self._stop_event.is_set():
+                    logger.info("Scraping stopped by user.")
+                    return
 
-                        category_tasks = []
-                        unique_places = []
+                async with self.semaphore:
+                    self.client.start = start
+                    places, more_places = await self.client.get_places()
+                    start += len(places)
+                    unique_places = [place for place in places if place.get("feature_id") not in seen_feature_ids]
 
-                        for place in places:
-                            feature_id = place.get("feature_id")
-                            if feature_id:
-                                feature_id = feature_id.strip().lower()
+                    for place in unique_places:
+                        seen_feature_ids.add(place.get("feature_id"))
 
-                            if feature_id and feature_id not in seen_feature_ids:
-                                seen_feature_ids.add(feature_id)
-                                category_tasks.append(client.fetch_category(feature_id))
-                                unique_places.append(place)
-
+                    if self.options.get("category", False):
+                        category_tasks = [
+                            self.client.fetch_category(place.get("feature_id")) for place in unique_places
+                        ]
                         categories = await asyncio.gather(*category_tasks)
                         for place, category_html in zip(unique_places, categories):
-                            category = client.parse_category_html(category_html)
+                            category = self.client.parse_category_html(category_html)
                             place['category'] = category
-                            self.update_data.emit(place)
-                            # logger.info(f"Updated place with feature_id: {place['feature_id']} and category: {category}")
 
-            tasks = [fetch_places(query) for query in self.queries]
-            await asyncio.gather(*tasks)
+                    if any(self.options.get(option, False) for option in CHECKBOX_OPTIONS if CHECKBOX_OPTIONS[option].get("req", False)):
+
+                        url_tasks = [
+                            fetch_utils.fetch_url(self.session, place.get("url"), place.get("feature_id")) 
+                            for place in unique_places if place.get("url")
+                        ]
+                        page_contents = await asyncio.gather(*url_tasks)
+
+                        for (page_content, feature_id), place in zip(page_contents, unique_places):
+                            if page_content:
+                                matched_place = next((p for p in unique_places if p.get("feature_id") == feature_id), None)
+                                if matched_place:
+                                    for option in CHECKBOX_OPTIONS:
+                                        if self.options.get(option, False) and CHECKBOX_OPTIONS[option].get("req", False):
+                                            extractor_class = CHECKBOX_OPTIONS[option]["extractor"]
+                                            extracted_data = extractor_class.extract(page_content)
+                                            matched_place[option] = extracted_data
+
+                    for place in unique_places:
+                        self.update_data.emit(place)
+
+            await asyncio.sleep(0)
+
+        tasks = [fetch_places(query) for query in self.queries]
+        await asyncio.gather(*tasks)
+
+
+    def stop(self):
+        logger.info("Stop requested for scraper worker.")
+        self._stop_event.set()

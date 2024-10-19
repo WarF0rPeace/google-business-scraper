@@ -100,3 +100,30 @@ QComboBox QAbstractItemView {
 QComboBox QAbstractItemView::item {
     padding: 10px;
 }
+
+QCheckBox {
+    color: #ffffff;
+    font-size: 16px;
+    padding: 5px;
+}
+
+QCheckBox::indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #b6b5b4;
+    border: 1px solid #4e545e;
+}
+
+QCheckBox::indicator:unchecked {
+    background-color: #282c34;
+    border: 1px solid #4e545e;
+}
+
+QCheckBox:hover {
+    background-color: #333333;
+    border-radius: 5px;
+}

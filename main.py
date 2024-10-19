@@ -1,9 +1,11 @@
 import os
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QWidget, QHBoxLayout
+from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QWidget, QHBoxLayout, QFrame, QVBoxLayout, QPushButton
 from PySide6.QtGui import QIcon, QPixmap
-from pages.scraper_page import ScraperPage
+from components.sidebar import Sidebar
+from utils.page_manager import PageManager
 from modules.logger import get_logger
+
 logger = get_logger(__name__)
 
 class MainWindow(QMainWindow):
@@ -17,21 +19,27 @@ class MainWindow(QMainWindow):
         
         self.set_icon("assets/icon.ico")
         
-        self.stacked_widget = QStackedWidget()
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+        
+        main_layout = QHBoxLayout(self.central_widget)
+        self.page_manager = PageManager()
+        menu_items = self.page_manager.get_menu_items()
+        self.sidebar = Sidebar(self, [(info["name"], info["icon"]) for info in menu_items.values()])
+        main_layout.addWidget(self.sidebar)
 
-        self.pages = {
-            "scraper_page": ScraperPage(),
-        }
+        self.content_area = QFrame(self)
+        self.content_layout = QVBoxLayout(self.content_area)
+        main_layout.addWidget(self.content_area)
+        
+        self.pages = {page_id: page for page_id, page in self.page_manager.pages.items()}
+        
+        self.current_page = None
+        self.update_content("settings_page")
+        self.sidebar.set_active_button(self.sidebar.findChild(QPushButton, "Ayarlar"))
+        
+        
         logger.info(f"Pages initialized: {list(self.pages.keys())}")
-        for page in self.pages.values():
-            self.stacked_widget.addWidget(page)
-
-        main_layout = QHBoxLayout()
-        main_layout.addWidget(self.stacked_widget)
-
-        container = QWidget()
-        container.setLayout(main_layout)
-        self.setCentralWidget(container)
 
         try:
             self.load_stylesheet("styles/scraper_styles.qss")
@@ -40,10 +48,7 @@ class MainWindow(QMainWindow):
             logger.error(f"Failed to load stylesheet: {e}")
 
     def load_stylesheet(self, path):
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            base_dir = sys._MEIPASS
-        else:
-            base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
         full_path = os.path.join(base_dir, path)
         try:
             with open(full_path, "r") as file:
@@ -55,10 +60,7 @@ class MainWindow(QMainWindow):
             logger.exception(f"Unexpected error while loading stylesheet: {e}")
     
     def set_icon(self, path):
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            base_dir = sys._MEIPASS
-        else:
-            base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
         icon_path = os.path.join(base_dir, path)
         try:
             my_pixmap = QPixmap(icon_path)
@@ -68,6 +70,14 @@ class MainWindow(QMainWindow):
         except Exception as e:
             logger.error(f"Failed to set icon: {e}")
 
+    def update_content(self, page_id):
+        if self.current_page:
+            self.current_page.hide()
+
+        self.current_page = self.pages[page_id]
+        if not self.current_page.isVisible():
+            self.content_layout.addWidget(self.current_page)
+        self.current_page.show()
 
 if __name__ == "__main__":
     logger.info("Application started")
