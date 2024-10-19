@@ -1,8 +1,7 @@
-import sys
-import os
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QPushButton, QGraphicsDropShadowEffect
 from PySide6.QtGui import QIcon, QPixmap, qAlpha, QColor
 from PySide6.QtCore import Qt, QSize
+import os
 from modules.logger import get_logger
 
 logger = get_logger(__name__)
@@ -28,9 +27,7 @@ class Sidebar(QFrame):
 
     def load_stylesheet(self, filename):
         logger.debug(f"Loading stylesheet from {filename}.")
-        base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
-        full_path = os.path.join(base_dir, filename)
-        with open(full_path, "r", encoding="utf-8") as file:
+        with open(filename, "r", encoding="utf-8") as file:
             self.setStyleSheet(file.read())
 
     def create_button(self, text, icon_path):
