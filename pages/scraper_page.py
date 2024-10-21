@@ -1,3 +1,5 @@
+import sys
+import os
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QFileDialog,
@@ -17,6 +19,7 @@ logger = get_logger(__name__)
 class ScraperPage(QWidget):
     def __init__(self, settings_page):
         super().__init__()
+        self.load_stylesheet("styles/scraper_styles.qss")
         self.settings_page = settings_page
         self.data_keys = {}
         self.settings_page.options_updated.connect(self.update_headers)
@@ -35,6 +38,20 @@ class ScraperPage(QWidget):
         self.setup_timer_label()
         self.setup_total_data_label()
         self.setup_export_section()
+    
+    def load_stylesheet(self, path):
+        base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.dirname(base_dir)
+        full_path = os.path.join(base_dir, path)
+
+        try:
+            with open(full_path, "r", encoding="utf-8") as file:
+                self.setStyleSheet(file.read())
+                logger.debug(f"Stylesheet applied from {full_path}")
+        except FileNotFoundError:
+            logger.error(f"Stylesheet file not found at {full_path}")
+        except Exception as e:
+            logger.exception(f"Unexpected error while loading stylesheet: {e}")
 
     def setup_layouts(self):
         self.main_layout = QVBoxLayout(self)
@@ -53,6 +70,7 @@ class ScraperPage(QWidget):
 
     def create_button(self, text, callback):
         button = QPushButton(text)
+        button.setObjectName(text)
         button.clicked.connect(callback)
         self.top_layout.addWidget(button)
 
@@ -94,6 +112,11 @@ class ScraperPage(QWidget):
         self.results_table.setHorizontalHeaderLabels(list(self.data_keys.keys()))
 
     def start_scraping(self):
+        if hasattr(self, 'worker') and self.worker.isRunning():
+            logger.warning("Scraping process is already running.")
+            QMessageBox.warning(self, "Uyarı", "Scraping işlemi zaten çalışıyor.")
+            return
+
         queries = self.settings_page.get_queries()
         if queries:
             self.update_headers()
@@ -101,6 +124,11 @@ class ScraperPage(QWidget):
 
             logger.info("Starting scraping process.")
             self.results_table.setRowCount(0)
+
+            start_button = self.findChild(QPushButton, "Başlat")
+            if start_button:
+                start_button.setEnabled(False)
+
             self.worker = ScraperWorker(queries=queries, options=selected_options, max_concurrent_requests=20)
             self.worker.update_data.connect(self.add_row_to_table)
             self.worker.finished.connect(self.finish_scraping)
@@ -117,12 +145,20 @@ class ScraperPage(QWidget):
             self.worker.terminate()
             logger.info("Scraping process stopped.")
         self.timer.stop()
+        
+        start_button = self.findChild(QPushButton, "Başlat")
+        if start_button:
+            start_button.setEnabled(True)
 
     def finish_scraping(self):
         logger.info("Scraping process finished.")
         self.timer.stop()
         self.update_time()
         self.update_total_count()
+        
+        start_button = self.findChild(QPushButton, "Başlat")
+        if start_button:
+            start_button.setEnabled(True)
 
     def update_time(self):
         self.elapsed_time += 1

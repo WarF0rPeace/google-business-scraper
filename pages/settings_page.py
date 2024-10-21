@@ -1,3 +1,5 @@
+import sys
+import os
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QFileDialog,
     QPushButton, QListWidget, QLineEdit, QCheckBox, QMessageBox,
@@ -69,10 +71,20 @@ class SettingsPage(QWidget):
         button.clicked.connect(callback)
         self.layout.addWidget(button)
 
-    def load_stylesheet(self, filename):
-        logger.debug(f"Loading stylesheet from {filename}.")
-        with open(filename, "r", encoding="utf-8") as file:
-            self.setStyleSheet(file.read())
+    def load_stylesheet(self, path):
+        base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.dirname(base_dir)
+        full_path = os.path.join(base_dir, path)
+
+        try:
+            with open(full_path, "r", encoding="utf-8") as file:
+                self.setStyleSheet(file.read())
+                logger.debug(f"Stylesheet applied from {full_path}")
+        except FileNotFoundError:
+            logger.error(f"Stylesheet file not found at {full_path}")
+        except Exception as e:
+            logger.exception(f"Unexpected error while loading stylesheet: {e}")
+
 
     def add_query(self):
         query_text = self.query_input.text().strip()

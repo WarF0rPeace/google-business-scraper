@@ -1,7 +1,8 @@
+import sys
+import os
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QPushButton, QGraphicsDropShadowEffect
 from PySide6.QtGui import QIcon, QPixmap, qAlpha, QColor
 from PySide6.QtCore import Qt, QSize
-import os
 from modules.logger import get_logger
 
 logger = get_logger(__name__)
@@ -25,10 +26,19 @@ class Sidebar(QFrame):
 
         self.load_stylesheet("styles/sidebar.qss")
 
-    def load_stylesheet(self, filename):
-        logger.debug(f"Loading stylesheet from {filename}.")
-        with open(filename, "r", encoding="utf-8") as file:
-            self.setStyleSheet(file.read())
+    def load_stylesheet(self, path):
+        base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.dirname(base_dir)
+        full_path = os.path.join(base_dir, path)
+
+        try:
+            with open(full_path, "r", encoding="utf-8") as file:
+                self.setStyleSheet(file.read())
+                logger.debug(f"Stylesheet applied from {full_path}")
+        except FileNotFoundError:
+            logger.error(f"Stylesheet file not found at {full_path}")
+        except Exception as e:
+            logger.exception(f"Unexpected error while loading stylesheet: {e}")
 
     def create_button(self, text, icon_path):
         button = QPushButton(text)
