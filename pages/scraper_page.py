@@ -40,8 +40,10 @@ class ScraperPage(QWidget):
         self.setup_export_section()
     
     def load_stylesheet(self, path):
-        base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
-        base_dir = os.path.dirname(base_dir)
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            base_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         full_path = os.path.join(base_dir, path)
 
         try:
