@@ -19,7 +19,7 @@ async def fetch_url(client, url, feature_id):
         response = await client.get(url, headers=headers, follow_redirects=True, timeout=3)
         response.raise_for_status()
         return response.text, feature_id
-    except httpx.HTTPStatusError as e:
+    except httpx._exceptions.HTTPStatusError as e:
         logger.error(f"Error fetching URL {url}: {e}")
         return None, feature_id
     except Exception as e:
