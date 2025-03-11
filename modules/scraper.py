@@ -6,6 +6,7 @@ from PySide6.QtCore import QThread, Signal
 from utils import fetch_utils
 from utils.constants import CHECKBOX_OPTIONS
 from modules.logger import get_logger
+import re
 
 logger = get_logger(__name__)
 
@@ -65,6 +66,23 @@ class GoogleEarthClient:
         soup = bs(html_data, 'html.parser')
         category = soup.find("span", class_="Qfo35d")
         return category.text if category else None
+    
+    def parse_lat_long_html(self, html_data):
+        if html_data is None:
+            return None
+        soup = bs(html_data, 'html.parser')
+        map_div = soup.find('div', class_='jK1Lre')
+        if not map_div:
+            return None
+        map_link = map_div.find('a', href=True, text=re.compile('Google Haritalar'))
+        if not map_link:
+            return None
+        url = map_link['href']
+        match = re.search(r'@(-?\d+\.\d+),(-?\d+\.\d+)', url)
+        if match:
+            latitude, longitude = match.groups()
+            return float(latitude), float(longitude)
+        return None
 
     def parse_xml(self, xml_data):
         if xml_data is None:
@@ -159,14 +177,21 @@ class ScraperWorker(QThread):
                     for place in unique_places:
                         seen_feature_ids.add(place.get("feature_id"))
 
-                    if self.options.get("category", False):
-                        category_tasks = [
-                            self.client.fetch_category(place.get("feature_id")) for place in unique_places
-                        ]
-                        categories = await asyncio.gather(*category_tasks)
-                        for place, category_html in zip(unique_places, categories):
-                            category = self.client.parse_category_html(category_html)
-                            place['category'] = category
+                    parse_category = self.options.get("category", False)
+                    parse_lat_long = self.options.get("lat_long", False)
+
+                    if parse_category or parse_lat_long:
+                        tasks = [self.client.fetch_category(place.get("feature_id")) for place in unique_places]
+                        results = await asyncio.gather(*tasks)
+
+                        for place, result in zip(unique_places, results):
+                            if isinstance(result, str):
+                                if parse_category:
+                                    category = self.client.parse_category_html(result)
+                                    place['category'] = category
+                                if parse_lat_long:
+                                    lat_long = self.client.parse_lat_long_html(result)
+                                    place['lat_long'] = lat_long
 
                     if any(self.options.get(option, False) for option in CHECKBOX_OPTIONS if CHECKBOX_OPTIONS[option].get("req", False)):
 

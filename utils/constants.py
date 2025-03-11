@@ -37,6 +37,10 @@ CHECKBOX_OPTIONS = {
         "label": "Kategori",
         "description": "Kategorileri Çek",
     },
+    "lat_long": {
+        "label": "Enlem Boylam",
+        "description": "Enlem Boylam Çek",
+    },
     "mail": {
         "label": "Mail",
         "description": "Mailleri Çek",
