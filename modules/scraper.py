@@ -109,7 +109,6 @@ class GoogleEarthClient:
                 rating = place_card.find("rating")
                 rating_score = rating.get("num_rating_stars") if rating else None
                 review_count_element = rating.find(".//review_count/anchor_text") if rating else None
-                review_count_element = rating.find(".//review_count/anchor_text") if rating else None
                 review_count_text = review_count_element.text.split()[0] if review_count_element is not None else '0'
 
                 try:
