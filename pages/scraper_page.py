@@ -131,7 +131,7 @@ class ScraperPage(QWidget):
             if start_button:
                 start_button.setEnabled(False)
 
-            self.worker = ScraperWorker(queries=queries, options=selected_options, max_concurrent_requests=20)
+            self.worker = ScraperWorker(queries=queries, options=selected_options, max_concurrent_requests=5)
             self.worker.update_data.connect(self.add_row_to_table)
             self.worker.finished.connect(self.finish_scraping)
             self.timer.start(1000)
