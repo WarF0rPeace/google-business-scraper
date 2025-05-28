@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 logger = get_logger(__name__)
 
 def create_client():
-    return httpx.AsyncClient()
+    return httpx.AsyncClient(timeout=20, limits=httpx.Limits(max_connections=100, max_keepalive_connections=20))
 
 async def fetch_url(client, url, feature_id):
     domain_pattern = re.compile(
